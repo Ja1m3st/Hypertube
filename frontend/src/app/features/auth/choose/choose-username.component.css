@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.desktop-bg {
+  min-height: 100vh;
+  background-color: #008080; /* El clásico verde azulado de Windows 98 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'MS Sans Serif', 'Arial', sans-serif;
+}
+
+.win98-dialog {
+  background: #c0c0c0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #000000;
+  border-bottom: 2px solid #000000;
+  box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
+  width: 400px;
+  max-width: 90%;
+}
+
+.dialog-titlebar {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 3px;
+  margin: 2px;
+}
+
+.title-text {
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0;
+}
+
+.win-close-btn {
+  background: #c0c0c0;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  font-size: 10px;
+  font-weight: bold;
+  color: #808080; /* Gris para indicar que no se puede cerrar esta ventana */
+  padding: 1px 4px;
+}
+
+.dialog-body {
+  padding: 16px 20px 8px;
+}
+
+.dialog-message p {
+  font-size: 11px;
+  color: #000000;
+  line-height: 1.4;
+}
+
+.input-container {
+  margin-top: 14px;
+  margin-bottom: 10px;
+}
+
+.win-input {
+  width: 100%;
+  padding: 4px;
+  background: #ffffff;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  font-family: 'MS Sans Serif', 'Arial', sans-serif;
+  font-size: 12px;
+  outline: none;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.15);
+}
+
+.win-input:focus {
+  outline: 1px dotted #000000;
+  outline-offset: -3px;
+}
+
+.error-box {
+  color: #800000;
+  font-size: 11px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  padding: 10px 16px 16px;
+}
+
+.win-btn {
+  background: #c0c0c0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #000000;
+  border-bottom: 2px solid #000000;
+  box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
+  font-family: 'MS Sans Serif', 'Arial', sans-serif;
+  font-size: 11px;
+  padding: 4px 30px;
+  cursor: pointer;
+  color: #000;
+}
+
+/* Efecto visual al hacer clic en el botón */
+.win-btn:active:not(:disabled) {
+  border-top: 2px solid #000000;
+  border-left: 2px solid #000000;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  padding-top: 5px;
+  padding-left: 31px;
+  padding-bottom: 3px;
+  padding-right: 29px;
+}
+
+.win-btn:disabled {
+  color: #808080;
+  cursor: wait;
+}

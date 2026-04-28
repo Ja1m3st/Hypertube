@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "hypertube.security.jwt.secret-key",
+    "type": "java.lang.String",
+    "description": "A description for 'hypertube.security.jwt.secret-key'"
+  },
+  {
+    "name": "hypertube.security.jwt.expiration",
+    "type": "java.lang.String",
+    "description": "A description for 'hypertube.security.jwt.expiration'"
+  },
+  {
+    "name": "hypertube.security.omdb.key",
+    "type": "java.lang.String",
+    "description": "A description for 'hypertube.security.omdb.key'"
+  },
+  {
+    "name": "hypertube.security.tmdb.key",
+    "type": "java.lang.String",
+    "description": "A description for 'hypertube.security.tmdb.key'"
+  }
+]}

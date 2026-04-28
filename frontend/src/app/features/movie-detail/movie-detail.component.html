@@ -1,0 +1,378 @@
+<div class="detail-container">
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="bg-glow bg-glow--right"></div>
+
+  <nav class="nav">
+    <button class="btn-back" (click)="goBack()">
+      <svg viewBox="0 0 20 20" fill="none">
+        <path d="M12 4L6 10l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ langService.t('back') }}
+    </button>
+    <a routerLink="/home" class="nav-logo">Hyper<span class="accent">tube</span></a>
+    <div class="nav-right" style="display: flex; align-items: center; gap: 10px;">
+
+      <button class="win95-logout-btn" (click)="logout()" [title]="langService.t('log_out')">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M10 2v2h2v8h-2v2h4V2h-4zM2 9h6v2l4-3-4-3v2H2v2z"/>
+        </svg>
+        {{ langService.t('logout') }}
+      </button>
+
+      <div class="nav-avatar"  title="Profile" (click)="goToProfile()">
+        <img *ngIf="user?.profilePictureUrl; else defaultIcon" 
+            [src]="user.profilePictureUrl" 
+            referrerpolicy="no-referrer"
+            alt="Profile" />
+
+        <ng-template #defaultIcon>
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M3 17c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </ng-template>
+      </div>
+    </div>
+    
+  </nav>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+  </div>
+
+  <main class="main" *ngIf="!isLoading && movie">
+
+    <div class="hero-backdrop">
+      <img [src]="movie.backdrop_path || movie.poster_path" [alt]="movie.title" class="backdrop-img" />
+      <div class="backdrop-overlay"></div>
+    </div>
+
+    <section class="movie-info-section">
+      <div class="movie-layout">
+
+        <div class="poster-col">
+          <div class="poster-wrapper">
+            <img [src]="movie.poster_path" [alt]="movie.title" class="poster-img" />
+          </div>
+        </div>
+
+        <div class="info-col">
+          <div class="genre-chips">
+            <span class="genre-chip" *ngFor="let g of movie.genres">{{ g.name }}</span>
+          </div>
+
+          <h1 class="movie-title">{{ movie.title }}</h1>
+          <p class="movie-tagline" *ngIf="movie.tagline">{{ movie.tagline }}</p>
+
+          <div class="meta-row">
+            <span class="meta-badge-gold">★ {{ movie.vote_average | number:'1.1-1' }}</span>
+            <span class="meta-sep">·</span>
+            <span class="meta-text">{{ movie.release_date | date:'yyyy' }}</span>
+            <span class="meta-sep">·</span>
+            <span class="meta-text" *ngIf="movie.runtime">{{ formatRuntime(movie.runtime) }}</span>
+            <span class="meta-sep">·</span>
+            <span class="meta-status">{{ movie.status }}</span>
+          </div>
+
+          <p class="movie-overview">{{ movie.overview }}</p>
+
+          <div class="action-row">
+
+            <ng-container *ngIf="downloadStatus === 'idle' && resumePercent > 0">
+              <button class="btn-watch-now btn-continue" (click)="showPlayer(true)">
+                <svg viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M5 3.5l8 4.5-8 4.5V3.5z"/>
+                </svg>
+                {{ langService.t('continue_at') }} {{ resumePercent }}%
+              </button>
+              <button class="btn-watch-now btn-start-over" (click)="showPlayer(false)">
+                {{ langService.t('start_over') }}
+              </button>
+            </ng-container>
+
+            <button class="btn-watch-now"
+                    *ngIf="downloadStatus === 'idle' && resumePercent === 0"
+                    (click)="showPlayer(false)">
+              <svg viewBox="0 0 16 16" fill="currentColor">
+                <path d="M5 3.5l8 4.5-8 4.5V3.5z"/>
+              </svg>
+              {{ langService.t('watch_now') }}
+            </button>
+            <button class="btn-watch-now btn-fav"
+                    [class.active-fav]="isFavorite" 
+                    (click)="toggleFavorite()"
+                    [disabled]="isTogglingFavorite"
+                    [title]="isFavorite ? langService.t('favorited') : langService.t('favorite')">
+              <svg viewBox="0 0 16 16" fill="currentColor">
+                <path *ngIf="!isFavorite" d="M8 1.5l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.2l-3.8 2.1.7-4.3-3.1-3 4.3-.6L8 1.5z" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                <path *ngIf="isFavorite"  d="M8 1.5l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.2l-3.8 2.1.7-4.3-3.1-3 4.3-.6L8 1.5z"/>
+              </svg>
+              {{ isFavorite ? langService.t('favorited') : langService.t('favorite') }}
+            </button>
+
+            <div *ngIf="downloadStatus === 'downloading'" class="download-container">
+              <button class="btn-watch-now btn-loading" disabled>
+                <span class="btn-spinner"></span>
+                {{ isReadyToResume
+                    ? langService.t('starting_stream')
+                    : (_pendingResume
+                        ? langService.t('buffering') + ' ' + (resumePercent + 5) + '%'
+                        : langService.t('buffering'))
+                }}
+              </button>
+              <div class="progress-bar-wrapper">
+                <div class="progress-bar" [style.width.%]="downloadProgress"></div>
+                <div class="resume-mark"
+                    *ngIf="resumePercent > 0"
+                    [style.left.%]="resumePercent">
+                </div>
+                <span class="progress-label">
+                  {{ downloadProgress }}% downloaded
+                  <span *ngIf="!isReadyToResume && _pendingResume">
+                    (Need {{ resumePercent + 5 }}% to resume)
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <div *ngIf="downloadStatus === 'error'" class="download-error">
+              <svg viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm-.75 4h1.5v4.5h-1.5V5zm0 6h1.5v1.5h-1.5V11z"/>
+              </svg>
+              {{ downloadMessage }}
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item" *ngIf="movie.budget">
+              <span class="stat-label">{{ langService.t('budget') }}</span>
+              <span class="stat-value">{{ formatMoney(movie.budget) }}</span>
+            </div>
+            <div class="stat-item" *ngIf="movie.revenue">
+              <span class="stat-label">{{ langService.t('revenue') }}</span>
+              <span class="stat-value">{{ formatMoney(movie.revenue) }}</span>
+            </div>
+            <div class="stat-item" *ngIf="movie.spoken_languages.length">
+              <span class="stat-label">{{ langService.t('language') }}</span>
+              <span class="stat-value">{{ movie.spoken_languages[0].english_name }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">{{ langService.t('votes') }}</span>
+              <span class="stat-value">{{ movie.vote_count | number }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="player-section" *ngIf="playerVisible">
+      <div class="player-wrapper" #playerContainer>
+        <div class="player-header">
+          <div class="player-pill">
+            <span class="pill-dot"></span> {{ langService.t('streaming') }}
+          </div>
+          <span class="player-title">{{ movie.title }}</span>
+        </div>
+        <div class="player-wrapper-custom" style="position: relative;">
+          <div *ngIf="!isStreamReady" 
+              style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; z-index: 10; border-radius: 14px;">
+            <div class="spinner"></div> <p style="color: #888; margin-top: 10px;">Loading...</p>
+          </div>
+          <video
+            #videoPlayer
+            preload="auto"
+            [style.opacity]="isStreamReady ? '1' : '0'"
+            style="width:100%; border-radius:14px; background:#000; display:block; transition: opacity 0.5s ease;"
+            (loadeddata)="onStreamDataLoaded()"
+            (loadedmetadata)="onMetadata()"
+            (timeupdate)="onTimeUpdate()"
+            (pause)="onPause()" 
+            (ended)="onEnded()"
+          ></video>
+
+          <div class="custom-controls" *ngIf="isStreamReady">
+
+            <div class="progress-track"
+              (click)="seekTo($event)"
+              (mousemove)="onProgressHover($event)"
+              (mouseleave)="onProgressLeave()"
+              [class.cursor-pointer]="canSeekHover"
+              [class.cursor-not-allowed]="!canSeekHover">
+
+              <div class="progress-tooltip"
+                *ngIf="hoverPercent > 0"
+                [style.left.%]="hoverPercent">
+                {{ formatTime((hoverPercent / 100) * totalDuration) }}
+              </div>
+
+              <div class="progress-downloaded" [style.width.%]="downloadProgress"></div>
+              <div class="progress-played"     [style.width.%]="playedPercent"></div>
+              <div class="progress-thumb"      [style.left.%]="playedPercent"></div>
+            </div>
+
+            <div class="controls-row">
+
+
+
+
+
+                <button class="ctrl-btn" (click)="togglePlay()">
+                  <svg *ngIf="!isPlaying" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5 3.5l8 4.5-8 4.5V3.5z"/>
+                  </svg>
+                  <svg *ngIf="isPlaying" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="3" y="2" width="3" height="12" rx="1"/>
+                    <rect x="10" y="2" width="3" height="12" rx="1"/>
+                  </svg>
+                </button>
+                  <button class="ctrl-btn" (click)="togglePiP()" title="Picture-in-Picture">
+                  <svg viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M2 3.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-9zM2.5 4v8h11V4h-11zm5.5 4.5h4v3h-4v-3z"/>
+                  </svg>
+                </button>
+                              <!-- Selector de idioma de subtítulos -->
+                <div class="subtitle-control" *ngIf="playerVisible && isStreamReady">
+                    <div *ngIf="subtitleUrl" style="display: flex; align-items: center; gap: 4px; margin-right: 8px; background: #808080; border: 1px inset #fff; padding: 2px;">
+                      <button class="ctrl-btn" (click)="adjustSubtitleDelay(-0.5)" title="Atrasar subtítulos">-</button>
+                      <span style="font-family: 'MS Sans Serif', sans-serif; font-size: 10px; color: #fff; min-width: 30px; text-align: center;">
+                        {{ subtitleDelay > 0 ? '+' : '' }}{{ subtitleDelay }}s
+                      </span>
+                      <button class="ctrl-btn" (click)="adjustSubtitleDelay(0.5)" title="Adelantar subtítulos">+</button>
+                    </div>
+                    <!-- Selector inline si la película no es en inglés -->
+                    <div *ngIf="showLangSelector" class="lang-selector-banner">
+                        <span>{{ langService.t('select_subtitle_lang') }}:</span>
+                        <button *ngFor="let l of availableLangs"
+                                class="lang-btn"
+                                [class.active]="subtitleLang === l.code"
+                                (click)="loadSubtitle(l.code)">
+                            {{ l.label }}
+                        </button>
+                        <button class="lang-btn lang-btn--none" (click)="showLangSelector = false">
+                            {{ langService.t('no_subtitles') }}
+                        </button>
+                    </div>
+                    <!-- Botón CC en los controles -->
+                    <button class="ctrl-btn ctrl-btn--cc"
+                            (click)="showLangSelector = !showLangSelector"
+                            [class.active]="!!subtitleUrl"
+                            title="Subtitles">
+                        <svg viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="3" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                            <text x="8" y="11" text-anchor="middle" font-size="5.5" font-weight="bold" fill="currentColor">CC</text>
+                        </svg>
+                    </button>
+                </div>
+
+              <span class="ctrl-time">{{ currentTimeStr }} / {{ durationStr }}</span>
+
+              <div style="flex:1"></div>
+
+              <input class="ctrl-volume" type="range" min="0" max="1" step="0.05"
+                [value]="volume" (input)="setVolume($event)"/>
+
+              <button class="ctrl-btn" (click)="toggleFullscreen()">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M2 5V2h3M11 2h3v3M14 11v3h-3M5 14H2v-3"/>
+                </svg>
+              </button>
+            </div>
+
+          </div>
+        </div>
+        <p class="player-disclaimer">
+          Content is provided by third-party sources. HyperTube is not responsible for external content.
+        </p>
+      </div>
+    </section>
+
+    <section class="companies-section" *ngIf="movie.production_companies.length">
+      <div class="companies-inner">
+        <div>
+          <h3 class="sub-title">{{ langService.t('production') }}</h3>
+          <div class="companies-row">
+            <div class="company-badge" *ngFor="let c of movie.production_companies | slice:0:6">
+              {{ c.name }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="companies-section" *ngIf="similarMovies.length > 0">
+      <div class="companies-inner">
+        <div style="width: 100%;">
+          <h3 class="sub-title">Recomendaciones</h3>
+          <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px;">
+            <div *ngFor="let sim of similarMovies" 
+                 style="width: 120px; cursor: pointer; flex-shrink: 0;"
+                 (click)="goToSimilarMovie(sim.id)"
+                 [title]="sim.title">
+              <img [src]="sim.poster_path" 
+                   [alt]="sim.title"
+                   style="width: 100%; height: 180px; object-fit: cover; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-right: 2px solid #000000; border-bottom: 2px solid #000000; box-shadow: 2px 2px 0 #000000;">
+              <p style="font-family: 'MS Sans Serif', sans-serif; font-size: 11px; color: #ffffff; text-align: center; margin-top: 6px; text-shadow: 1px 1px 0 #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                {{ sim.title }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="comments-section" *ngIf="movie">
+    <div class="comments-inner">
+      <div style="width: 100%;">
+        <h3 class="sub-title">{{ langService.t('comments') }}</h3>
+
+      <div class="comment-form-wrapper">
+        <textarea
+          class="comment-textarea"
+          [(ngModel)]="newCommentText"
+          [disabled]="isSubmittingComment"
+          [placeholder]="langService.t('write_comment')"
+          maxlength="500"
+          rows="3">
+        </textarea>
+        <div class="comment-form-footer">
+          <span class="comment-char-count">{{ newCommentText.length }}/500</span>
+          <button class="btn-watch-now btn-comment-submit"
+                  (click)="submitComment()"
+                  [disabled]="isSubmittingComment || newCommentText.trim().length === 0">
+            <svg viewBox="0 0 16 16" fill="currentColor">
+              <path d="M1 1l14 7-14 7V9.5l10-1.5-10-1.5V1z"/>
+            </svg>
+            {{ isSubmittingComment ? langService.t('posting') : langService.t('post') }}
+          </button>
+        </div>
+        <div class="comment-error" *ngIf="commentError">{{ commentError }}</div>
+      </div>
+
+      <div class="comments-loading" *ngIf="isLoadingComments">
+        <div class="spinner"></div>
+      </div>
+
+      <div class="comments-empty" *ngIf="!isLoadingComments && comments.length === 0">
+        {{ langService.t('no_comments') }}
+      </div>
+
+      <div class="comments-list" *ngIf="!isLoadingComments && comments.length > 0">
+        <div class="comment-item" *ngFor="let c of comments">
+          <div class="comment-avatar" (click)="goToUserProfile(c.username)" title="View profile">
+            <img *ngIf="c.avatar" [src]="c.avatar" [alt]="c.username" class="comment-avatar-img"/>
+            <span *ngIf="!c.avatar" class="comment-avatar-initials">{{ getInitials(c.firstName, c.lastName) }}</span>
+          </div>
+          <div class="comment-body">
+            <div class="comment-header">
+              <span class="comment-username" (click)="goToUserProfile(c.username)">{{ c.username }}</span>
+              <span class="comment-name">{{ c.firstName }} {{ c.lastName }}</span>
+              <span class="comment-date">{{ c.createdAt | date:'dd MMM yyyy' }}</span>
+            </div>
+            <p class="comment-text">{{ c.text }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+  </main>
+</div>

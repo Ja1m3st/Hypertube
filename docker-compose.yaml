@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: Postgrees
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - hypertube_net
+
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: always
+    ports:
+      - "8080:8080"
+      - "6891-6991:6891-6991"
+      - "6891-6991:6891-6991/udp"
+    volumes:
+      - ./backend:/app 
+    environment:
+      - API_OPENSUBTITLES=${API_OPENSUBTITLES}
+      - DB_URL=jdbc:postgresql://db:5432/${DB_NAME} 
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - TMDB_KEY=${TMDB_KEY}
+      - JWT_KEY=${JWT_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - FORTYTWO_CLIENT_ID=${FORTYTWO_CLIENT_ID}
+      - FORTYTWO_CLIENT_SECRET=${FORTYTWO_CLIENT_SECRET}
+      - JWT_EXPIRATION=86400000
+    depends_on:
+      - db
+    networks:
+      - hypertube_net
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "4000:4200"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules 
+    depends_on:
+      - backend
+    networks:
+      - hypertube_net
+
+networks:
+  hypertube_net:
+    driver: bridge
+
+volumes:
+  db_data:
