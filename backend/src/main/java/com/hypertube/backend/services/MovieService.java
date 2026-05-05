@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 @Service    
 @RequiredArgsConstructor
@@ -64,7 +66,19 @@ public class MovieService {
                      + tmdbApiKey + "&language=" + language + "&query=" + encodedQuery + "&page=1&include_adult=false";
 
         String json = restTemplate.getForObject(url, String.class);
-        return mapper.readValue(json, Object.class);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> response = mapper.readValue(json, Map.class);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
+        
+        if (results != null) {
+            results.sort((peli1, peli2) -> {
+                String titulo1 = (String) peli1.getOrDefault("title", "");
+                String titulo2 = (String) peli2.getOrDefault("title", "");
+                return titulo1.compareToIgnoreCase(titulo2);
+            });
+        }
+        return response;
     }
 
 	// ── TMDB: descubrir películas con filtros ──────────────────────────────

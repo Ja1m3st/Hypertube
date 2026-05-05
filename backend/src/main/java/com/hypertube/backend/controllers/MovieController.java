@@ -147,7 +147,6 @@ public class MovieController {
                                         @RequestBody Map<String, String> body) {
         String title = body.get("title");
         String year  = body.get("year");
-
         Optional<Movie> existing = arrayMovies.stream()
             .filter(m -> m.getId().equals(id))
             .findFirst();
@@ -169,34 +168,7 @@ public class MovieController {
             ));
         }
 
-        File torrentsRoot = new File("/tmp/torrents");
-        if (torrentsRoot.exists() && torrentsRoot.isDirectory()) {
-            File[] dirs = torrentsRoot.listFiles(File::isDirectory);
-            if (dirs != null) {
-                for (File dir : dirs) {
-                    File found = buscarRecursivo(dir);
-                    if (found != null) {
-                        if (found.length() > MIN_STREAMABLE_BYTES) {
-    
-                            Movie movie = new Movie(id, title, year, found, 100, null);
-                            movie.setStatus(DownloadStatus.COMPLETED);
-                            movie.setCurrentProgress(100);
-                            arrayMovies.add(movie);
-                            downloadDirs.put(id, dir);
-                            return ResponseEntity.ok(Map.of(
-                                "status",  "already_downloaded",
-                                "message", "File already available"
-                            ));
-                        } else {
-                            found.delete();
-                        }
-                    }
-                }
-            }
-        }
-
         String magnetUri;
-        
         try {
             magnetUri = movieService.findMagnetLegal(title, year);
         } catch (Exception e) {
@@ -208,9 +180,7 @@ public class MovieController {
                 "error", "No torrent found for: " + title
             ));
         }
-
-
-        Movie movie = new Movie(id, title, year, findDownloadedFile(id), 0, magnetUri);
+        Movie movie = new Movie(id, title, year, null, 0, magnetUri);
         movie.setStatus(DownloadStatus.PENDING);
         arrayMovies.add(movie);
 
@@ -228,6 +198,7 @@ public class MovieController {
             "message", "Download started for: " + title
         ));
     }
+
 
     // ══════════════════════════════════════════════════════════════════════════
     //  GET /{id}/progress  (SSE)

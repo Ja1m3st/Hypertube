@@ -309,17 +309,16 @@ export class MovieDetailComponent implements OnInit, OnDestroy {
 		this.playerVisible = true;
 		this.isStreamReady = false;
 
-		const originalLang = this.movie?.original_language ?? 'en';
-		if (originalLang === 'en') {
-			this.subtitleLang = 'en';
-			this.subtitleUrl  = `/api/movies/${this.movieId}/subtitles?lang=en&imdbId=${(this.movie as any).imdb_id}`;
-			this.showLangSelector = false;
-		} else {
-			this.showLangSelector = true;
-		}
+		const currentAppLang = this.langService.lang;
+        
+        this.subtitleLang = currentAppLang;
+        this.subtitleUrl  = `/api/movies/${this.movieId}/subtitles?lang=${currentAppLang}&imdbId=${(this.movie as any).imdb_id}`;
+        
+        this.showLangSelector = true;
 
 		this.cdr.detectChanges();
 
+		
 		setTimeout(() => {
 			this.scrollToPlayer();
 			this.waitForStreamReady(seekSeconds);
