@@ -23,6 +23,9 @@ public class MovieService {
 	@Value("${hypertube.security.tmdb.key}")
 	private String tmdbApiKey;
 
+    @Value("${hypertube.security.omdb.key}")
+    private String omdbApiKey;
+
 	private final RestTemplate restTemplate = new RestTemplate();
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final MovieRepository movieRepository;
@@ -48,37 +51,81 @@ public class MovieService {
     }
 
 	// ── TMDB: detalle de película ──────────────────────────────
-	public Object getMovieDetail(Long id, String language) throws Exception {
+    public Object getMovieDetail(Long id, String language) throws Exception {
         if (language == null || language.isBlank()) language = "en-US";
-        
         String url = "https://api.themoviedb.org/3/movie/" + id 
-                     + "?api_key=" + tmdbApiKey + "&language=" + language;
+                     + "?api_key=" + tmdbApiKey + "&language=" + language + "&append_to_response=credits";
         String json = restTemplate.getForObject(url, String.class);
         return mapper.readValue(json, Object.class);
     }
 
-	// ── TMDB: buscar películas por nombre ──────────────────────
-	public Object searchMoviesFromTmdb(String query, String language) throws Exception {
+    public Object searchMoviesFromTmdb(String query, String language) throws Exception {
         if (language == null || language.isBlank()) language = "en-US";
-        
         String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
-        String url = "https://api.themoviedb.org/3/search/movie?api_key=" 
-                     + tmdbApiKey + "&language=" + language + "&query=" + encodedQuery + "&page=1&include_adult=false";
 
-        String json = restTemplate.getForObject(url, String.class);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> response = mapper.readValue(json, Map.class);
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
+        String tmdbUrl = "https://api.themoviedb.org/3/search/movie?api_key=" 
+                     + tmdbApiKey + "&language=" + language + "&query=" + encodedQuery + "&page=1&include_adult=false";
         
-        if (results != null) {
-            results.sort((peli1, peli2) -> {
-                String titulo1 = (String) peli1.getOrDefault("title", "");
-                String titulo2 = (String) peli2.getOrDefault("title", "");
-                return titulo1.compareToIgnoreCase(titulo2);
-            });
+        String tmdbJson = restTemplate.getForObject(tmdbUrl, String.class);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> tmdbResponse = mapper.readValue(tmdbJson, Map.class);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> tmdbResults = (List<Map<String, Object>>) tmdbResponse.getOrDefault("results", new java.util.ArrayList<>());
+
+        String omdbUrl = "https://www.omdbapi.com/?apikey=" + omdbApiKey + "&s=" + encodedQuery + "&type=movie";
+        List<Map<String, Object>> omdbResults = new java.util.ArrayList<>();
+        
+        try {
+            String omdbJson = restTemplate.getForObject(omdbUrl, String.class);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> omdbResponse = mapper.readValue(omdbJson, Map.class);
+            
+            if (omdbResponse.containsKey("Search")) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> search = (List<Map<String, Object>>) omdbResponse.get("Search");
+                
+                for (Map<String, Object> item : search) {
+                    Map<String, Object> mappedMovie = new java.util.HashMap<>();
+                    mappedMovie.put("title", item.get("Title"));
+                    mappedMovie.put("release_date", item.get("Year"));
+                    String poster = (String) item.get("Poster");
+                    mappedMovie.put("poster_path", "N/A".equals(poster) ? null : poster);
+                    String imdbId = (String) item.get("imdbID");
+                    long numericId = Long.parseLong(imdbId.replace("tt", ""));
+                    mappedMovie.put("id", numericId); 
+                    mappedMovie.put("vote_average", 0.0);
+                    omdbResults.add(mappedMovie);
+                }
+            }
+        } catch (Exception e) {
         }
-        return response;
+
+        Map<String, Map<String, Object>> mergedMap = new java.util.HashMap<>();
+
+        for (Map<String, Object> peli : omdbResults) {
+            String titulo = (String) peli.getOrDefault("title", "");
+            mergedMap.put(titulo.toLowerCase(), peli);
+        }
+        for (Map<String, Object> peli : tmdbResults) {
+            String titulo = (String) peli.getOrDefault("title", "");
+            mergedMap.put(titulo.toLowerCase(), peli);
+        }
+
+        List<Map<String, Object>> finalResults = new java.util.ArrayList<>(mergedMap.values());
+
+        finalResults.sort((peli1, peli2) -> {
+            String titulo1 = (String) peli1.getOrDefault("title", "");
+            String titulo2 = (String) peli2.getOrDefault("title", "");
+            return titulo1.compareToIgnoreCase(titulo2);
+        });
+
+        Map<String, Object> finalResponse = new java.util.HashMap<>();
+        finalResponse.put("page", 1);
+        finalResponse.put("results", finalResults);
+        finalResponse.put("total_results", finalResults.size());
+        finalResponse.put("total_pages", 1);
+
+        return finalResponse;
     }
 
 	// ── TMDB: descubrir películas con filtros ──────────────────────────────
@@ -116,7 +163,6 @@ public class MovieService {
 		if (!docs.isArray() || docs.isEmpty()) {
 			return null;
 		}
-
 		JsonNode best = null;
 		for (JsonNode doc : docs) {
 			String docYear = doc.path("year").asText();

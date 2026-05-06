@@ -319,6 +319,32 @@
         </div>
       </div>
     </section>
+
+    <!-- SECCIÓN REPARTO (CAST) -->
+    <section class="companies-section" *ngIf="movie.credits?.cast?.length">
+      <div class="companies-inner">
+        <div style="width: 100%;">
+          <h3 class="sub-title">Reparto</h3>
+          <div class="cast-scroll">
+            <div class="cast-card" *ngFor="let actor of movie.credits!.cast | slice:0:10">
+              <div class="cast-img-wrapper">
+                <img *ngIf="actor.profile_path; else noPhoto" 
+                     [src]="'https://image.tmdb.org/t/p/w200' + actor.profile_path" 
+                     [alt]="actor.name"
+                     class="cast-img">
+                <ng-template #noPhoto>
+                  <div class="cast-no-img">No Photo</div>
+                </ng-template>
+              </div>
+              <p class="cast-name" [title]="actor.name">{{ actor.name }}</p>
+              <p class="cast-character" [title]="actor.character">{{ actor.character }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <section class="comments-section" *ngIf="movie">
     <div class="comments-inner">
       <div style="width: 100%;">

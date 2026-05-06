@@ -888,6 +888,88 @@ html, body { overflow-y: auto !important; height: auto !important; }
 }
 
 
+/* ─── Cast (Reparto) ── */
+.cast-scroll {
+  display: flex; 
+  gap: 12px; 
+  overflow-x: auto; 
+  padding-bottom: 12px;
+}
+
+.cast-card {
+  width: 120px; 
+  flex-shrink: 0;
+  background: #c0c0c0;
+  border-top: 2px solid #ffffff; 
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #808080; 
+  border-bottom: 2px solid #808080;
+  padding: 4px;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center;
+  box-shadow: 2px 2px 0 #000000;
+}
+
+.cast-img-wrapper {
+  width: 100%; 
+  height: 140px;
+  /* Efecto hundido para la foto */
+  border-top: 2px solid #808080; 
+  border-left: 2px solid #808080;
+  border-right: 2px solid #ffffff; 
+  border-bottom: 2px solid #ffffff;
+  background: #000000; 
+  overflow: hidden; 
+  margin-bottom: 6px;
+}
+
+.cast-img {
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+  display: block;
+}
+
+.cast-no-img {
+  width: 100%; 
+  height: 100%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  color: #808080; 
+  font-size: 10px; 
+  font-weight: bold; 
+  background: #ffffff;
+}
+
+.cast-name {
+  font-family: 'MS Sans Serif', 'Arial', sans-serif;
+  font-size: 11px; 
+  font-weight: bold; 
+  color: #000000; 
+  text-align: center; 
+  line-height: 1.1; 
+  margin-bottom: 2px;
+  /* Truncar a 2 líneas si es muy largo */
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical; 
+  overflow: hidden;
+}
+
+.cast-character {
+  font-family: 'MS Sans Serif', 'Arial', sans-serif;
+  font-size: 10px; 
+  color: #444444; 
+  text-align: center; 
+  line-height: 1.1;
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical; 
+  overflow: hidden;
+}
+
 @media (max-width: 900px) {
   .comments-section { padding: 20px 12px 0; }
 }

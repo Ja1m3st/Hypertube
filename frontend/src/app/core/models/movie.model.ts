@@ -27,4 +27,7 @@ export interface MovieDetail extends Movie {
   revenue: number;
   production_companies: { id: number; name: string; logo_path: string | null }[];
   spoken_languages: { english_name: string }[];
+  credits?: {
+    cast: any[];
+  };
 }

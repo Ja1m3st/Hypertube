@@ -19,12 +19,14 @@ export class MovieService {
   private langService = inject(LanguageService);
   private readonly API = '/api/movies';
 
-  private fixPaths(movie: any): any {
+  private fixPaths(movie: any): any { 
+    const finalPosterPath = movie.poster_path 
+        ? (movie.poster_path.startsWith('http') ? movie.poster_path : `https://image.tmdb.org/t/p/w500${movie.poster_path}`)
+        : 'assets/placeholder.jpg';
+
     return {
       ...movie,
-      poster_path: movie.poster_path
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-        : 'assets/placeholder.jpg',
+      poster_path: finalPosterPath,
       backdrop_path: movie.backdrop_path
         ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`
         : null,
