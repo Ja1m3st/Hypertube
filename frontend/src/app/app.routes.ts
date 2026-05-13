@@ -10,6 +10,7 @@ import { ForgotPasswordComponent } from './features/auth/forgot/forgot-password.
 import { ResetPasswordComponent } from './features/auth/reset/reset-password.component';
 import { Oauth2RedirectComponent } from './features/auth/oauth/oauth2-redirect.component';
 import { ChooseUsernameComponent } from './features/auth/choose/choose-username.component';
+import { authGuard } from './core/interceptors/auth.interceptor';
 
 
 export const routes: Routes = [
@@ -19,21 +20,29 @@ export const routes: Routes = [
 
   { path: 'register', component: RegisterComponent },
 
-  { path: 'home', component: HomeComponent },
+  { 
+    path: 'home', 
+    component: HomeComponent, 
+    canActivate: [authGuard]
+  },
 
-  { path: 'movie/:id', component: MovieDetailComponent }, 
+  { path: 'movie/:id', component: MovieDetailComponent, 
+    canActivate: [authGuard] }, 
 
-  { path: 'profile', component: ProfileComponent },
+  { path: 'profile', component: ProfileComponent, 
+    canActivate: [authGuard] },
 
   { path: 'forgot-password', component: ForgotPasswordComponent },
 
   { path: 'reset-password', component: ResetPasswordComponent },
 
-  { path: 'user/:username', component: PublicProfileComponent },
+  { path: 'user/:username', component: PublicProfileComponent, 
+    canActivate: [authGuard] },
 
   { path: 'auth-callback', component: Oauth2RedirectComponent },
 
-  { path: 'choose-username', component: ChooseUsernameComponent },
+  { path: 'choose-username', component: ChooseUsernameComponent, 
+    canActivate: [authGuard] },
 
   { path: '**', redirectTo: '' }
 

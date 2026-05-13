@@ -10,6 +10,7 @@ import { HistoryService } from '../../core/services/history.service';
 import { UserService } from '../../core/services/user.service';
 import { LanguageService, Lang } from '../../core/services/languaje.service';
 
+
 @Component({
 	selector: 'app-home',
 	standalone: true,
