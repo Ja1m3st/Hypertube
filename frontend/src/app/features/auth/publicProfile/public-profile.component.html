@@ -1,0 +1,134 @@
+<div class="profile-container">
+
+  <nav class="nav">
+    <button class="btn-back" (click)="goBack()">
+      <svg viewBox="0 0 20 20" fill="none">
+        <path d="M12 4L6 10l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ langService.t('back') }}
+    </button>
+    <a routerLink="/home" class="nav-logo">Hyper<span class="accent">tube</span></a>
+    <div class="nav-right" style="display: flex; align-items: center; gap: 10px;">
+
+      <button class="win95-logout-btn" (click)="logout()" [title]="langService.t('log_out')">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M10 2v2h2v8h-2v2h4V2h-4zM2 9h6v2l4-3-4-3v2H2v2z"/>
+        </svg>
+        {{ langService.t('logout') }}
+      </button>
+
+      <div class="nav-avatar" title="Profile" (click)="goToProfile()">
+        <img *ngIf="user?.profilePictureUrl; else defaultIcon" 
+            [src]="user?.profilePictureUrl" 
+            referrerpolicy="no-referrer"
+            alt="Profile" />
+
+        <ng-template #defaultIcon>
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M3 17c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </ng-template>
+      </div>
+
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <div class="spinner" *ngIf="isLoading"></div>
+
+    <div class="error-window" *ngIf="errorMsg && !isLoading">
+      <div class="error-titlebar">
+        <span class="error-titlebar-title">Error</span>
+        <button class="error-titlebar-btn">✕</button>
+      </div>
+      <div class="error-body">
+        <span class="error-icon">⚠</span>
+        <p class="error-text">{{ errorMsg }}</p>
+      </div>
+      <div class="error-footer">
+        <button class="btn-ok" (click)="goBack()">{{ langService.t('ok') }}</button>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!isLoading && userProfile">
+
+      <section class="profile-hero">
+        <div class="profile-hero-content">
+
+          <div class="avatar-wrapper">
+            <div class="avatar-ring">
+              <div class="avatar-inner">
+                <img *ngIf="userProfile.profilePictureUrl"
+                  class="avatar-img" [src]="userProfile.profilePictureUrl" [alt]="userProfile.username" />
+                <span *ngIf="!userProfile.profilePictureUrl" class="avatar-initials">
+                  {{ userProfile.username.charAt(0) | uppercase }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-info">
+            <div class="profile-name-row">
+              <h1 class="profile-name">{{ userProfile.username }}</h1>
+              <span class="profile-badge">
+                <svg viewBox="0 0 12 12" fill="none">
+                  <circle cx="6" cy="6" r="5" fill="#3b82f6" opacity="0.15"/>
+                  <path d="M3.5 6l2 2 3-3" stroke="#3b82f6" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ langService.t('member') }}
+              </span>
+            </div>
+            <p class="profile-fullname" *ngIf="userProfile.firstName || userProfile.lastName">
+              {{ userProfile.firstName }} {{ userProfile.lastName }}
+            </p>
+            <div class="profile-stats">
+              <div class="stat-item">
+                <span class="stat-value">{{ publicFavorites.length }}</span>
+                <span class="stat-label">{{ langService.t('favorites') }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="section" style="padding-top: 20px;">
+        
+        <div style="margin-bottom: 20px; padding-left: 20px;">
+          <h2 style="font-family: 'VT323', monospace; font-size: 28px; color: #ffffff; text-shadow: 2px 2px 0 #000;">{{ langService.t('favorites') }}</h2>
+        </div>
+
+        <div class="movies-grid" *ngIf="publicFavorites.length">
+          <div class="movie-card" *ngFor="let movie of publicFavorites" (click)="goToMovie(movie.id)">
+            <div class="card-poster">
+              <img [src]="movie.poster_path" [alt]="movie.title" loading="lazy" />
+              <div class="card-overlay">
+                <button class="play-btn">
+                  <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5l8 4.5-8 4.5V3.5z"/></svg>
+                </button>
+              </div>
+              <div class="fav-badge">
+                <svg viewBox="0 0 10 10" fill="none">
+                  <path d="M5 8S1.5 5.8 1.5 3.5A2.5 2.5 0 015 2.1a2.5 2.5 0 013.5 1.4C8.5 5.8 5 8 5 8z" fill="#f43f5e" opacity="0.9"/>
+                </svg>
+              </div>
+            </div>
+            <div class="card-info">
+              <p class="card-title">{{ movie.title }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="empty-state" *ngIf="!publicFavorites.length">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 38S8 28 8 16a10 10 0 0116-8 10 10 0 0116 8c0 12-16 22-16 22z" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <p>{{ langService.t('no_favorites') }}</p>
+        </div>
+      </section>
+
+    </ng-container>
+  </main>
+</div>

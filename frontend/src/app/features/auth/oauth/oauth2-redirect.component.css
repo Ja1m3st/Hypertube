@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.auth-container {
+  min-height: 100vh;
+  background: #008080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+  padding: 60px 24px;
+}
+
+.auth-card {
+  width: 360px;
+  max-width: 100%;
+  background: #c0c0c0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.win98-titlebar {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: #ffffff;
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.win98-titlebar-buttons {
+  display: flex;
+  gap: 2px;
+}
+
+.win98-btn {
+  width: 16px;
+  height: 14px;
+  background: #c0c0c0;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+  font-size: 9px;
+  font-weight: bold;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.auth-body {
+  padding: 20px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-inset-box {
+  background: #ffffff;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.hourglass-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.auth-title {
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+  font-size: 14px;
+  color: #000000;
+  font-weight: bold;
+  margin: 0;
+}
+
+.auth-subtitle {
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+  font-size: 11px;
+  color: #444444;
+  margin: 0;
+}
+
+.progress-wrap {
+  width: 100%;
+  background: #ffffff;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  height: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    #000080 0px, #000080 8px,
+    #1084d0 8px, #1084d0 16px
+  );
+  animation: march 2.2s linear infinite;
+  width: 40%;
+  position: absolute;
+}
+
+@keyframes march {
+  0%   { left: -40%; }
+  100% { left: 100%; }
+}
+
+.win98-statusbar {
+  display: flex;
+  gap: 3px;
+  padding: 0 3px 3px;
+}
+
+.status-cell {
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+  font-size: 11px;
+  color: #000;
+  padding: 2px 6px;
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  margin: 3px 0 3px 0;
+  flex: 1;
+}
+
+.status-active {
+  color: #000080;
+  font-weight: bold;
+  flex: 2;
+}

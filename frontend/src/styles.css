@@ -1,0 +1,36 @@
+/* frontend/src/styles.css */
+
+:root {
+  --bg-color: #121212;
+  --card-bg-color: #1e1e1e;
+  --text-primary: #f0f0f0;
+  --text-secondary: #a0a0a0;
+  --accent-blue: #38bdf8;
+  --accent-green: #4ade80;
+  --error-red: #f87171;
+  --font-family: 'Poppins', sans-serif;
+}
+
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  overflow-y:auto;
+}
+
+a { text-decoration: none; color: inherit; transition: color 0.2s; }
+a:hover { color: var(--accent-blue); }
+
+.glass-effect {
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}

@@ -1,0 +1,75 @@
+<div class="auth-container">
+  <div class="auth-bg-grid"></div>
+  <div class="auth-bg-glow"></div>
+
+  <div class="auth-card register-card">
+    <span class="auth-logo">Hyper<span class="accent">tube</span></span>
+
+    <h1 class="auth-title">Create an account</h1>
+    <p class="auth-subtitle">Join and start watching in minutes</p>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+      <div *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</div>
+
+      <p class="section-label">Personal info</p>
+
+      <div class="field-row-grid">
+        <div class="field-group">
+          <label for="firstName">First name</label>
+          <input id="firstName" type="text" formControlName="firstName" placeholder="First Name">
+        </div>
+        <div class="field-group">
+          <label for="lastName">Last name</label>
+          <input id="lastName" type="text" formControlName="lastName" placeholder="Last Name">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="email">Email address</label>
+        <input id="email" type="email" formControlName="email" placeholder="example@gmail.com" autocomplete="email">
+        <span class="input-error" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['email']">
+          Must be a valid email address.
+        </span>
+      </div>
+
+      <p class="section-label" style="margin-top: 8px;">Account credentials</p>
+
+    <div class="field-group">
+        <label for="username">Username</label>
+        <input id="username" type="text" formControlName="username" placeholder="Example" autocomplete="username">
+      </div>
+
+      <div class="field-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Min. 8 characters"
+          autocomplete="new-password"
+          (input)="onPasswordInput($event)">
+        <div class="strength-bars">
+          <span class="strength-bar" [class.active]="passwordStrength >= 1" [style.background]="strengthColor"></span>
+          <span class="strength-bar" [class.active]="passwordStrength >= 2" [style.background]="strengthColor"></span>
+          <span class="strength-bar" [class.active]="passwordStrength >= 3" [style.background]="strengthColor"></span>
+          <span class="strength-bar" [class.active]="passwordStrength >= 4" [style.background]="strengthColor"></span>
+        </div>
+        <span class="strength-label" [style.color]="strengthColor">{{ strengthLabel }}</span>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="registerForm.invalid || isLoading">
+        {{ isLoading ? 'Creating account...' : 'Create account' }}
+      </button>
+
+    </form>
+
+    <p class="terms-note">
+      By registering you agree to the <a routerLink="/terms">Terms of Service</a> and <a routerLink="/privacy">Privacy Policy</a>
+    </p>
+
+    <p class="auth-footer">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>

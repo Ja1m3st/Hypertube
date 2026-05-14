@@ -1,0 +1,214 @@
+<div class="home-container">
+  <!-- Background -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="bg-glow bg-glow--right"></div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a routerLink="/home" class="nav-logo">Hyper<span class="accent">tube</span></a>
+    <div class="nav-center">
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 20 20" fill="none">
+          <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          [placeholder]="langService.t('search_placeholder')"
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+          autocomplete="off"
+        />
+        <span class="search-kbd" *ngIf="!searchQuery">⌘K</span>
+        <button class="search-clear" *ngIf="searchQuery" (click)="clearSearch()">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="nav-right" style="display: flex; align-items: center; gap: 10px;">
+
+      <!-- ── Language switcher ── -->
+      <div class="lang-switcher">
+        <button
+          *ngFor="let l of availableLangs"
+          class="lang-btn"
+          [class.lang-btn--active]="currentLang === l.code"
+          (click)="setLang(l.code)"
+          [title]="l.code.toUpperCase()"
+        >{{ l.label }}</button>
+      </div>
+
+      <button class="win95-logout-btn" (click)="logout()" title="Log out">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M10 2v2h2v8h-2v2h4V2h-4zM2 9h6v2l4-3-4-3v2H2v2z"/>
+        </svg>
+        {{ langService.t('logout') }}
+      </button>
+
+      <div class="nav-avatar" title="Profile" (click)="goToProfile()">
+        <img *ngIf="user?.profilePictureUrl; else defaultIcon"
+            [src]="user.profilePictureUrl"
+            referrerpolicy="no-referrer"
+            alt="Profile" />
+        <ng-template #defaultIcon>
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M3 17c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </ng-template>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Hero banner -->
+    <section class="hero-banner" *ngIf="!searchQuery && featuredMovie">
+      <div class="banner-bg">
+        <img [src]="featuredMovie.backdrop_path" [alt]="featuredMovie.title" class="banner-img" />
+        <div class="banner-overlay"></div>
+      </div>
+      <div class="banner-content">
+        <div class="banner-pill">
+          <span class="pill-dot"></span> {{ langService.t('featured') }}
+        </div>
+        <h1 class="banner-title">{{ featuredMovie.title }}</h1>
+        <p class="banner-overview">{{ featuredMovie.overview | slice:0:160 }}{{ featuredMovie.overview.length > 160 ? '…' : '' }}</p>
+        <div class="banner-meta">
+          <span class="meta-badge">{{ featuredMovie.vote_average | number:'1.1-1' }} ★</span>
+          <span class="meta-sep">·</span>
+          <span class="meta-year">{{ featuredMovie.release_date | date:'yyyy' }}</span>
+        </div>
+        <div class="banner-actions">
+          <a [routerLink]="['/movie', featuredMovie.id]" class="btn-watch">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5l8 4.5-8 4.5V3.5z"/></svg>
+            {{ langService.t('watch_now') }}
+          </a>
+          <button class="btn-info" (click)="goToMovie(featuredMovie.id)">{{ langService.t('more_info') }}</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Continue watching -->
+    <section class="section" *ngIf="!searchQuery && continueWatching.length > 0">
+      <div class="section-header">
+        <h2 class="section-title">{{ langService.t('continue_watching') }} <em>{{ langService.t('watching') }}</em></h2>
+        <span class="section-badge" style="background: #00ff00; border-color: #008000;">{{ langService.t('resume') }}</span>
+      </div>
+      <div class="movies-grid">
+        <div class="movie-card" *ngFor="let movie of continueWatching" (click)="goToMovie(movie.id)">
+          <div class="card-poster">
+            <img [src]="movie.posterPath || movie.poster_path" [alt]="movie.title" loading="lazy" (error)="onImageError($event)"/>
+            <div class="card-overlay">
+              <button class="play-btn">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5l8 4.5-8 4.5V3.5z"/></svg>
+              </button>
+            </div>
+            <div class="card-progress-container">
+               <div class="card-progress-bar" [style.width.%]="movie.progress"></div>
+            </div>
+          </div>
+          <div class="card-info">
+            <p class="card-title">{{ movie.title }}</p>
+            <div class="card-meta">
+              <span class="card-year" style="color: #ffff00;">{{ movie.progress }}{{ langService.t('completed') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search results -->
+    <section class="section" *ngIf="searchQuery">
+      <div class="section-header">
+        <h2 class="section-title">{{ langService.t('results_for') }} <em>"{{ searchQuery }}"</em></h2>
+        <span class="section-count" *ngIf="!isLoading">{{ filteredMovies.length }} {{ langService.t('titles') }}</span>
+      </div>
+      <div class="skeleton-grid" *ngIf="isLoading">
+        <div class="skeleton-card" *ngFor="let s of skeletons"></div>
+      </div>
+      <div class="movies-grid" *ngIf="!isLoading && filteredMovies.length">
+        <div class="movie-card" *ngFor="let movie of filteredMovies" (click)="goToMovie(movie.id)">
+          <div class="card-poster">
+            <img [src]="movie.poster_path" [alt]="movie.title" loading="lazy" />
+            <div class="card-overlay">
+              <button class="play-btn">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5l8 4.5-8 4.5V3.5z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="card-info">
+            <p class="card-title">{{ movie.title }}</p>
+            <div class="card-meta">
+              <span class="card-rating">★ {{ movie.vote_average | number:'1.1-1' }}</span>
+              <span class="card-year">{{ movie.release_date | date:'yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!isLoading && !filteredMovies.length">
+        <svg viewBox="0 0 48 48" fill="none">
+          <circle cx="22" cy="22" r="14" stroke="currentColor" stroke-width="2"/>
+          <path d="M32 32l9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M17 22h10M22 17v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.4"/>
+        </svg>
+        <p>{{ langService.t('no_results') }} "{{ searchQuery }}"</p>
+      </div>
+    </section>
+
+    <!-- Popular movies -->
+    <section class="section" *ngIf="!searchQuery">
+    <div class="section-header">
+        <h2 class="section-title">{{ langService.t('popular') }} <em>{{ langService.t('right_now') }}</em></h2>
+        <span class="section-badge">{{ langService.t('trending') }}</span>
+        
+        <div class="sort-container" style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+          <label style="font-size: 11px; color: white;">Ordenar por:</label>
+          <select class="win95-select" [(ngModel)]="currentSort" (change)="sortMovies()">
+            <option value="popular">Popularidad</option>
+            <option value="rating">Mejor valoradas</option>
+            <option value="newest">Más recientes</option>
+          </select>
+        </div>
+      </div>
+      <div class="skeleton-grid" *ngIf="isLoading">
+        <div class="skeleton-card" *ngFor="let s of skeletons"></div>
+      </div>
+      <div class="movies-grid" *ngIf="!isLoading">
+        <div class="movie-card" *ngFor="let movie of movies; let i = index"
+          (click)="goToMovie(movie.id)"
+          [style.animation-delay]="(i * 0.05) + 's'">
+          <div class="card-poster">
+            <img [src]="movie.poster_path" [alt]="movie.title" loading="lazy" />
+            <div class="card-overlay">
+              <button class="play-btn">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5l8 4.5-8 4.5V3.5z"/></svg>
+              </button>
+            </div>
+            <span class="card-rank">#{{ i + 1 }}</span>
+          </div>
+          <div class="card-info">
+            <p class="card-title">{{ movie.title }}</p>
+            <div class="card-meta">
+              <span class="card-rating">★ {{ movie.vote_average | number:'1.1-1' }}</span>
+              <span class="card-year">{{ movie.release_date | date:'yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" *ngIf="!searchQuery">
+      <div class="movies-grid" *ngIf="!isLoading"></div>
+      <div class="infinite-scroll-loader" *ngIf="isLoadingMore">
+          <div class="btn-spinner"></div>
+          <span class="loading-text">{{ langService.t('loading_more') }}</span>
+      </div>
+    </section>
+
+  </main>
+</div>

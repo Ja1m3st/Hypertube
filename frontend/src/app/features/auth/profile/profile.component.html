@@ -1,0 +1,358 @@
+<div class="profile-container">
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="bg-glow bg-glow--right"></div>
+
+  <nav class="nav">
+    <button class="btn-back" (click)="goBack()">
+      <svg viewBox="0 0 20 20" fill="none">
+        <path d="M12 4L6 10l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ langService.t('back') }}
+    </button>
+    <a routerLink="/home" class="nav-logo">Hyper<span class="accent">tube</span></a>
+    <div class="nav-right">
+      <div class="nav-avatar"  title="Profile" (click)="goToProfile()">
+        <img *ngIf="user.profilePictureUrl; else defaultIcon" 
+            [src]="user.profilePictureUrl" 
+            referrerpolicy="no-referrer"
+            alt="Profile" />
+
+        <ng-template #defaultIcon>
+          <svg viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M3 17c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </ng-template>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <section class="profile-hero">
+      <div class="hero-backdrop"></div>
+      <div class="profile-hero-content">
+
+        <div class="avatar-wrapper">
+          <div class="avatar-ring">
+          <div class="avatar-inner">
+            <img *ngIf="user.profilePictureUrl" 
+                [src]="user.profilePictureUrl" 
+                alt="" />
+                
+            <span *ngIf="!user.profilePictureUrl" class="avatar-initials">
+              {{ getInitials() }}
+            </span>
+          </div>
+          </div>
+          <button class="avatar-edit-btn" title="Change avatar">
+            <svg viewBox="0 0 16 16" fill="none">
+              <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="profile-info">
+          <div class="profile-name-row">
+            <h1 class="profile-name">{{ user.username }}</h1>
+            <span class="profile-badge">
+              <svg viewBox="0 0 12 12" fill="none">
+                <circle cx="6" cy="6" r="5" fill="#3b82f6" opacity="0.15"/>
+                <path d="M3.5 6l2 2 3-3" stroke="#3b82f6" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ langService.t('member') }}
+            </span>
+          </div>
+          <p class="profile-email">{{ user.email }}</p>
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ watchedMovies.length }}</span>
+              <span class="stat-label">{{ langService.t('watched') }}</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">{{ favoriteMovies.length }}</span>
+              <span class="stat-label">{{ langService.t('favorites') }}</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">{{ historyMovies.length }}</span>
+              <span class="stat-label">{{ langService.t('history') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn-edit" (click)="setTab('settings')">
+            <svg viewBox="0 0 16 16" fill="none">
+              <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+            </svg>
+            {{ langService.t('account_settings') }}
+          </button>
+          <button class="btn-logout" (click)="logout()">
+            <svg viewBox="0 0 16 16" fill="none">
+              <path d="M10 3h3a1 1 0 011 1v8a1 1 0 01-1 1h-3M6 11l-4-4 4-4M2 7h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ langService.t('log_out') }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tabs-section">
+      <div class="tabs-bar">
+
+        <button class="tab-btn" [class.active]="activeTab === 'watched'" (click)="setTab('watched')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M2.5 5l2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ langService.t('watched') }}
+          <span class="tab-count">{{ watchedMovies.length }}</span>
+        </button>
+
+        <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="setTab('history')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M1.5 8S4 3 8 3s6.5 5 6.5 5S13 13 8 13 1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+          {{ langService.t('history') }}
+          <span class="tab-count">{{ historyMovies.length }}</span>
+        </button>
+
+        <button class="tab-btn" [class.active]="activeTab === 'favorites'" (click)="setTab('favorites')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M8 13S2 9.5 2 5.5A3.5 3.5 0 018 3.82 3.5 3.5 0 0114 5.5C14 9.5 8 13 8 13z" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+          {{ langService.t('favorites') }}
+          <span class="tab-count">{{ favoriteMovies.length }}</span>
+        </button>
+
+        <button class="tab-btn" [class.active]="activeTab === 'settings'" (click)="setTab('settings')">
+          <svg viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          {{ langService.t('settings') }}
+        </button>
+
+      </div>
+    </section>
+
+   <section class="section" *ngIf="activeTab === 'watched'">
+      <div class="movies-grid" *ngIf="watchedMovies.length">
+        <div class="movie-card" *ngFor="let movie of watchedMovies; let i = index"
+          (click)="goToMovie(movie.id)">
+          <div class="card-poster">
+            <img [src]="movie.poster_path" [alt]="movie.title" loading="lazy" />
+            <div class="card-overlay">
+              <button class="play-btn">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5l8 4.5-8 4.5V3.5z"/></svg>
+              </button>
+            </div>
+            <div class="watched-badge">
+              <svg viewBox="0 0 10 10" fill="none">
+                <circle cx="5" cy="5" r="4.5" fill="#22c55e" opacity="0.2"/>
+                <path d="M2.5 5l2 2 3-3" stroke="#22c55e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ langService.t('watched') }}
+            </div>
+          </div>
+          <div class="card-info">
+            <p class="card-title">{{ movie.title }}</p>
+            <div class="card-meta">
+              <span class="card-rating">★ {{ movie.vote_average | number:'1.1-1' }}</span>
+              <span class="card-year">{{ movie.release_date | date:'yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!watchedMovies.length">
+        <svg viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M20 18l10 6-10 6V18z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <p>{{ langService.t('no_watched') }}</p>
+        <a routerLink="/home" class="empty-cta">{{ langService.t('browse_movies') }}</a>
+      </div>
+    </section>
+
+    <section class="section" *ngIf="activeTab === 'history'">
+      <div class="movies-grid" *ngIf="historyMovies.length">
+        <div class="movie-card" *ngFor="let movie of historyMovies; let i = index"
+          (click)="goToMovie(movie.id)">
+          <div class="card-poster">
+            <img [src]="movie.poster_path" [alt]="movie.title" loading="lazy" />
+            <div class="card-overlay">
+              <button class="play-btn">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5l8 4.5-8 4.5V3.5z"/></svg>
+              </button>
+            </div>
+            <div class="watched-badge" style="background:#fff3cd; border-color:#808080;">
+              <svg viewBox="0 0 10 10" fill="none">
+                <circle cx="5" cy="5" r="4" stroke="#808000" stroke-width="1"/>
+                <path d="M5 3v2.5l1.5 1" stroke="#808000" stroke-width="1" stroke-linecap="round"/>
+              </svg>
+              {{ langService.t('in_progress') }}
+            </div>
+          </div>
+          <div class="card-info">
+            <p class="card-title">{{ movie.title }}</p>
+            <div class="card-meta">
+              <span class="card-rating">★ {{ movie.vote_average | number:'1.1-1' }}</span>
+              <span class="card-year">{{ movie.release_date | date:'yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!historyMovies.length">
+        <svg viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M24 14v10l6 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <p>{{ langService.t('no_history') }}</p>
+        <a routerLink="/home" class="empty-cta">{{ langService.t('browse_movies') }}</a>
+      </div>
+    </section>
+
+    <section class="section" *ngIf="activeTab === 'favorites'">
+      <div class="movies-grid" *ngIf="favoriteMovies.length">
+        <div class="movie-card" *ngFor="let movie of favoriteMovies; let i = index"
+          (click)="goToMovie(movie.id)"
+          [style.animation-delay]="(i * 0.04) + 's'">
+          <div class="card-poster">
+            <img [src]="movie.poster_path" [alt]="movie.title" loading="lazy" />
+            <div class="card-overlay">
+              <button class="play-btn">
+                <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5l8 4.5-8 4.5V3.5z"/></svg>
+              </button>
+            </div>
+            <div class="fav-badge">
+              <svg viewBox="0 0 10 10" fill="none">
+                <path d="M5 8S1.5 5.8 1.5 3.5A2.5 2.5 0 015 2.1a2.5 2.5 0 013.5 1.4C8.5 5.8 5 8 5 8z" fill="#f43f5e" opacity="0.9"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card-info">
+            <p class="card-title">{{ movie.title }}</p>
+            <div class="card-meta">
+              <span class="card-rating">★ {{ movie.vote_average | number:'1.1-1' }}</span>
+              <span class="card-year">{{ movie.release_date | date:'yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!favoriteMovies.length">
+        <svg viewBox="0 0 48 48" fill="none">
+          <path d="M24 38S8 28 8 16a10 10 0 0116-8 10 10 0 0116 8c0 12-16 22-16 22z" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <p>{{ langService.t('no_favorites') }}</p>
+        <a routerLink="/home" class="empty-cta">{{ langService.t('discover_movies') }}</a>
+      </div>
+    </section>
+
+    <section class="section settings-section" *ngIf="activeTab === 'settings'">
+      <div class="settings-grid">
+
+        <h3 style="font-family: 'MS Sans Serif'; font-size: 14px; color: #fff; margin-bottom: 8px; border-bottom: 1px solid #c0c0c0; padding-bottom: 4px;">{{ langService.t('account_setup') }}</h3>
+
+        <div class="settings-card">
+          <div class="settings-card-content">
+            <h3 class="settings-card-title">{{ langService.t('username_label') }}</h3>
+            <p class="settings-card-desc">{{ user.username }}</p>
+          </div>
+          <button class="settings-card-btn" (click)="openModal('username')">{{ langService.t('change') }}</button>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-content">
+            <h3 class="settings-card-title">{{ langService.t('email_label') }}</h3>
+            <p class="settings-card-desc">{{ user.email }}</p>
+          </div>
+          <button class="settings-card-btn" (click)="openModal('email')">{{ langService.t('change') }}</button>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-content">
+            <h3 class="settings-card-title">{{ langService.t('picture_label') }}</h3>
+            <p class="settings-card-desc">{{ langService.t('update_avatar') }}</p>
+          </div>
+          <button class="settings-card-btn" (click)="openModal('avatar')">{{ langService.t('change') }}</button>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-content">
+            <h3 class="settings-card-title">{{ langService.t('password_label') }}</h3>
+            <p class="settings-card-desc">••••••••</p>
+          </div>
+          <button class="settings-card-btn" (click)="openModal('password')">{{ langService.t('change') }}</button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <div class="modal-backdrop" *ngIf="activeModal !== 'none'">
+    <div class="win98-dialog">
+      
+      <div class="dialog-titlebar">
+        <div class="title-text">
+          <span *ngIf="activeModal === 'username'">{{ langService.t('change_username') }}</span>
+          <span *ngIf="activeModal === 'email'">{{ langService.t('change_email') }}</span>
+          <span *ngIf="activeModal === 'avatar'">{{ langService.t('change_avatar') }}</span>
+          <span *ngIf="activeModal === 'password'">{{ langService.t('change_password') }}</span>
+        </div>
+        <button class="win-close-btn" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="dialog-body">
+        
+        <div class="field-group" *ngIf="activeModal !== 'password'">
+          <label class="field-label">
+            <span *ngIf="activeModal === 'username'">{{ langService.t('new_username') }}</span>
+            <span *ngIf="activeModal === 'email'">{{ langService.t('new_email') }}</span>
+            <span *ngIf="activeModal === 'avatar'">{{ langService.t('image_url') }}</span>
+          </label>
+          <input 
+            type="text" 
+            class="win-input" 
+            [(ngModel)]="modalInput1" 
+            (keyup.enter)="saveModalChanges()"
+            autofocus 
+          />
+        </div>
+
+      <ng-container *ngIf="activeModal === 'password'">
+          <div class="field-group" style="margin-bottom: 8px;">
+            <label class="field-label">{{ langService.t('current_password') }}</label>
+            <input type="password" class="win-input" [(ngModel)]="modalInput1" />
+          </div>
+          <div class="field-group" style="margin-bottom: 8px;">
+            <label class="field-label">{{ langService.t('new_password') }}</label>
+            <input type="password" class="win-input" [(ngModel)]="modalInput2" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">{{ langService.t('confirm_password') }}</label>
+            <input type="password" class="win-input" [(ngModel)]="modalInput3" (keyup.enter)="saveModalChanges()"/>
+          </div>
+        </ng-container>
+
+        <div class="error-box" *ngIf="modalError">
+          ⚠ {{ modalError }}
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <button class="win-btn" (click)="saveModalChanges()" [disabled]="modalLoading">
+          {{ modalLoading ? langService.t('wait') : langService.t('ok') }}
+        </button>
+        <button class="win-btn" (click)="closeModal()" [disabled]="modalLoading" style="margin-left: 8px;">
+          {{ langService.t('cancel') }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
