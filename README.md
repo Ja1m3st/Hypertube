@@ -34,6 +34,8 @@ Hypertube is a 42 Common Core project. The goal is to build a complete video str
 
 The platform handles torrent downloading and streaming on the fly, serving video content to the browser while it is still being downloaded. Users can authenticate via local accounts, Google OAuth, or 42 OAuth, browse movie catalogs, read comments, and watch films with subtitles sourced from OpenSubtitles.
 
+<img width="2560" height="1292" alt="photo_5789541870231818087_w" src="https://github.com/user-attachments/assets/610270f7-21a1-482d-9985-75f9849b97c0" />
+
 ---
 
 ## Tech Stack
